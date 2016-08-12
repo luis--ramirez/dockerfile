@@ -8,7 +8,11 @@ RUN apt-get update && apt-get install -y php php-fpm php-mcrypt php-mysql php-ld
 RUN phpenmod mcrypt
 
 # Install more
-RUN apt-get -y install nginx openssl curl
+RUN apt-get -y install nginx openssl curl cron
+
+# Configure cron
+ADD crontab /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
 
 # Install composer and laravel installer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
@@ -31,4 +35,6 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 WORKDIR /www/laravel
 
 # Run the web server
-CMD service php7.0-fpm start && nginx -g "daemon off;"
+CMD cron && \
+		service php7.0-fpm start && \
+		nginx -g "daemon off;"
